@@ -33,8 +33,14 @@ async function run() {
     try {
 
         const userCollection = client.db("shop-bazar").collection("users");
+        const productCollection = client.db("shop-bazar").collection("products");
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
+
+        app.get('/products', async (req, res) => {
+            const result = await productCollection.find().toArray();
+            res.send(result);
+        });
 
         app.post("/register", async (req, res) => {
             const { name, email, password } = req.body;
