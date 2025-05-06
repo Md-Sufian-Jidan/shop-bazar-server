@@ -42,7 +42,7 @@ async function run() {
             res.send(result);
         });
 
-        app.post("/register", async (req, res) => {
+        app.post("/user-data", async (req, res) => {
             const { name, email, password } = req.body;
             try {
                 const existing = await userCollection.findOne({ email });
