@@ -35,6 +35,7 @@ async function run() {
         const userCollection = client.db("shop-bazar").collection("users");
         const productCollection = client.db("shop-bazar").collection("products");
         const reviewCollection = client.db("shop-bazar").collection("reviews");
+        const orderCollection = client.db("shop-bazar").collection("orders");
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
@@ -73,12 +74,9 @@ async function run() {
 
         app.get('/products/category/:name', async (req, res) => {
             const categoryName = req.params.name;
-            const products = await productCollection.find({ category: categoryName })
-                .project({ name: 1, price: 1, image: 1, _id: 1 })
-                .toArray();
+            const products = await productCollection.find({ category: categoryName }).toArray();
             res.send(products);
         });
-
 
         app.get('/products', async (req, res) => {
             const result = await productCollection.find().toArray();
@@ -114,6 +112,12 @@ async function run() {
                 console.error("Registration error:", err);
                 res.status(500).json({ message: "Registration failed" });
             }
+        });
+
+        app.post("/cart", async (req, res) => {
+            const cartItem = req.body;
+            const result = await orderCollection.insertOne(cartItem);
+            res.send(result);
         });
 
         // Send a ping to confirm a successful connection
