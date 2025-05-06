@@ -62,6 +62,16 @@ async function run() {
             }
         });
 
+        app.get('/products/featured', async (req, res) => {
+            try {
+                const featuredProducts = await productCollection.find({ featured: true }).toArray();
+                res.send(featuredProducts);
+            } catch (err) {
+                res.status(500).send({ error: 'Failed to fetch featured products' });
+            }
+        });
+
+
         app.get('/products', async (req, res) => {
             const result = await productCollection.find().toArray();
             res.send(result);
