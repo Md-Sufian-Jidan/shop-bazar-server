@@ -34,13 +34,9 @@ async function run() {
 
         const userCollection = client.db("shop-bazar").collection("users");
         const productCollection = client.db("shop-bazar").collection("products");
+        const reviewCollection = client.db("shop-bazar").collection("reviews");
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
-
-        app.get('/products', async (req, res) => {
-            const result = await productCollection.find().toArray();
-            res.send(result);
-        });
 
         app.get('/categories', async (req, res) => {
             try {
@@ -54,7 +50,7 @@ async function run() {
                     {
                         $project: {
                             _id: 0,
-                            category: "$_id",
+                            name: "$_id",
                             image: 1
                         }
                     }
@@ -66,6 +62,15 @@ async function run() {
             }
         });
 
+        app.get('/products', async (req, res) => {
+            const result = await productCollection.find().toArray();
+            res.send(result);
+        });
+
+        app.get('/testimonials', async (req, res) => {
+            const result = await reviewCollection.find().toArray();
+            res.send(result);
+        });
 
         app.post("/user-data", async (req, res) => {
             const { name, email, password } = req.body;
