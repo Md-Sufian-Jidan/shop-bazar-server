@@ -42,6 +42,31 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/categories', async (req, res) => {
+            try {
+                const categories = await productCollection.aggregate([
+                    {
+                        $group: {
+                            _id: "$category",
+                            image: { $first: "$image" }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            category: "$_id",
+                            image: 1
+                        }
+                    }
+                ]).toArray();
+
+                res.send(categories);
+            } catch (error) {
+                res.status(500).json({ error: 'Failed to load categories' });
+            }
+        });
+
+
         app.post("/user-data", async (req, res) => {
             const { name, email, password } = req.body;
             try {
@@ -49,7 +74,11 @@ async function run() {
                 if (existing) {
                     return res.status(400).json({ message: "Email already exists" });
                 }
-                const hashedPassword = await bcrypt.hash(password, 10);
+                let hashedPassword = null;
+                if (password) {
+                    hashedPassword = await bcrypt.hash(password, 10);
+                }
+
                 const result = await userCollection.insertOne({ name, email, password: hashedPassword, createdAt: new Date(), });
                 const userId = result.insertedId;
                 const user = { name, email };
