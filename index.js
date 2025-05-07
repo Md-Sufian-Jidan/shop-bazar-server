@@ -114,6 +114,13 @@ async function run() {
             }
         });
 
+        app.get("/cart/:email", async (req, res) => {
+            const email = req.params.email;
+            if (!email) return res.status(400).send({ error: "Email is required" });
+            const items = await orderCollection.find({ email }).toArray();
+            res.send(items);
+        });
+
         app.post("/cart", async (req, res) => {
             const cartItem = req.body;
             const result = await orderCollection.insertOne(cartItem);
