@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const app = express();
 const port = process.env.port || 7000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 //middlewares
 app.use(cors({
@@ -115,15 +115,22 @@ async function run() {
         });
 
         app.get("/cart/:email", async (req, res) => {
-            const email = req.params.email;
-            if (!email) return res.status(400).send({ error: "Email is required" });
-            const items = await orderCollection.find({ email }).toArray();
+            const userEmail = req.params.email;
+            if (!userEmail) return res.status(400).send({ error: "Email is required" });
+            const items = await orderCollection.find({ userEmail }).toArray();
             res.send(items);
         });
 
         app.post("/cart", async (req, res) => {
             const cartItem = req.body;
             const result = await orderCollection.insertOne(cartItem);
+            res.send(result);
+        });
+
+        app.delete("/cart/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await orderCollection.deleteOne(query);
             res.send(result);
         });
 
