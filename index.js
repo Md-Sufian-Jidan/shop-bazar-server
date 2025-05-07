@@ -39,6 +39,22 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
+        // middlewares 
+        const verifyToken = (req, res, next) => {
+            console.log('inside verify token', req.headers.authorization);
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: 'unauthorized access' });
+            }
+            const token = req.headers.authorization;
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'unauthorized access' })
+                }
+                req.decoded = decoded;
+                next();
+            });
+        };
+
         app.get('/categories', async (req, res) => {
             try {
                 const categories = await productCollection.aggregate([
@@ -114,7 +130,7 @@ async function run() {
             }
         });
 
-        app.get("/cart/:email", async (req, res) => {
+        app.get("/cart/:email", verifyToken, async (req, res) => {
             const userEmail = req.params.email;
             if (!userEmail) return res.status(400).send({ error: "Email is required" });
             const items = await orderCollection.find({ userEmail }).toArray();
